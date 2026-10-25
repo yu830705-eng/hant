@@ -1,0 +1,146 @@
+
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>日常健康指南</title>
+<style>
+:root{--bg:#f4f7f4;--card:#fff;--ink:#24332a;--muted:#65756a;--green:#286b50;--line:#dfe7df}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;line-height:1.65}
+main{max-width:900px;margin:auto;padding:24px 16px 50px}
+header{padding:18px 2px 25px}
+header small{color:var(--green);font-weight:800;letter-spacing:2px}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.2;margin:10px 0}
+header p,.muted{color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:16px}
+h2{font-size:20px;margin:0 0 16px}
+h3{font-size:16px;margin:20px 0 6px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+label{display:block;font-weight:650;font-size:14px;margin-bottom:5px}
+input,select{width:100%;padding:12px;border:1px solid #cbd8ce;border-radius:10px;background:white;font:inherit;min-height:46px}
+button{border:0;border-radius:11px;background:var(--green);color:white;padding:13px 18px;font:inherit;font-weight:750;cursor:pointer}
+.actions{display:flex;gap:10px;margin-top:18px}
+.secondary{background:#e9eee9;color:var(--ink)}
+.results{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.metric{padding:16px;background:#fbfdfb;border:1px solid var(--line);border-radius:13px}
+.metric span{font-size:13px;color:var(--muted)}
+.value{font-size:27px;font-weight:800;margin:5px 0}
+.pill{display:inline-block;background:#e6f2e9;color:var(--green);padding:3px 9px;border-radius:20px;font-size:13px}
+.warning{background:#fff5df;border:1px solid #ecd7a4;padding:15px;border-radius:12px;font-size:14px}
+li{margin:7px 0}
+a{color:var(--green);overflow-wrap:anywhere}
+footer{font-size:12px;color:var(--muted);padding:5px}
+@media(max-width:520px){.grid,.results{grid-template-columns:1fr}.card{padding:17px}.actions button{flex:1}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<small>PERSONAL HEALTH GUIDE</small>
+<h1>日常健康指南</h1>
+<p>根據你的身體資料，計算健康參考數值，提供飲食、飲水、運動與睡眠建議。以公開科學指引為基礎，不取代醫療診斷。</p>
+</header>
+
+<section class="card">
+<h2>你的基本資料</h2>
+<form id="form">
+<div class="grid">
+<div><label for="age">年齡（歲）</label><input id="age" type="number" min="18" max="110" value="32" required></div>
+<div><label for="sex">生理性別</label><select id="sex"><option value="male">男性</option><option value="female">女性</option><option value="other">不指定／其他</option></select></div>
+<div><label for="height">身高（公分）</label><input id="height" type="number" min="100" max="230" step="0.1" value="173" required></div>
+<div><label for="weight">體重（公斤）</label><input id="weight" type="number" min="25" max="350" step="0.1" value="70" required></div>
+<div><label for="activity">平常活動量</label><select id="activity"><option value="low">久坐、少運動</option><option value="moderate" selected>一般活動，每週運動 3–5 天</option><option value="high">高活動量／耐力運動</option></select></div>
+<div><label for="goal">健康目標</label><select id="goal"><option value="general">維持整體健康</option><option value="muscle">增肌／重訓</option><option value="endurance">耐力運動與恢復</option><option value="fatloss">體重管理／減脂</option></select></div>
+</div>
+<div class="actions"><button type="submit">計算我的建議</button><button class="secondary" type="reset">重設</button></div>
+<p id="error" role="alert" style="color:#a12626"></p>
+</form>
+</section>
+
+<section class="card" aria-live="polite">
+<h2>你的健康參考</h2>
+<div class="results">
+<div class="metric"><span>BMI 身體質量指數</span><div class="value" id="bmi">—</div><div class="pill" id="bmiStatus">等待計算</div><p class="muted">BMI 不能直接測量體脂或肌肉量。</p></div>
+<div class="metric"><span>每日蛋白質</span><div class="value" id="protein">—</div><span id="proteinDetail">依體重與目標估算</span></div>
+<div class="metric"><span>每日總水分參考</span><div class="value" id="water">—</div><span>包含食物與所有飲料中的水分</span></div>
+<div class="metric"><span>飲料水分粗略起點</span><div class="value" id="drink">—</div><span>非硬性最低量，需依個人狀況調整</span></div>
+</div>
+<h3>蛋白質計算依據</h3>
+<p id="proteinReason"></p>
+<h3>飲水建議</h3>
+<ul id="waterTips"></ul>
+<h3>每週運動建議</h3>
+<ul>
+<li>逐步達到每週 150–300 分鐘中等強度有氧活動，或等量高強度活動。</li>
+<li>每週至少 2 天肌力訓練，涵蓋主要肌群。</li>
+<li>若平常少運動，從短時間散步開始，再逐步增加活動量。</li>
+</ul>
+<h3>今天可以執行的 5 件事</h3>
+<ul>
+<li>每餐安排蛋白質來源，例如豆腐、豆類、蛋、魚、乳品或瘦肉。</li>
+<li>多吃蔬菜、水果、全穀與豆類，減少含糖飲料。</li>
+<li>久坐時定時起身走動。</li>
+<li>成人通常以每晚至少 7 小時睡眠為目標。</li>
+<li>記錄運動、睡眠與恢復情況，不只看體重。</li>
+</ul>
+</section>
+
+<section class="warning">
+<strong>重要安全提醒</strong><br>
+若有慢性腎臟病、心臟衰竭、肝臟疾病、醫囑限水或限蛋白、懷孕或哺乳等情況，請先詢問醫師或營養師，不要直接套用本工具數值。運動時不要強迫大量喝水。若出現胸痛、呼吸困難、意識混亂等急性症狀，請立即就醫。
+</section>
+
+<section class="card">
+<h2>研究與權威資料來源</h2>
+<ol>
+<li><a href="https://www.hpa.gov.tw/Pages/List.aspx?nodeid=4613" target="_blank" rel="noopener">衛生福利部國民健康署：國人膳食營養素參考攝取量</a></li>
+<li><a href="https://knowledge4policy.ec.europa.eu/health-promotion-knowledge-gateway/defining-water-recommendations-3_en" target="_blank" rel="noopener">EFSA：成人每日總水分攝取參考</a></li>
+<li><a href="https://www.who.int/europe/publications/i/item/9789240014886" target="_blank" rel="noopener">WHO：身體活動與久坐行為指引</a></li>
+<li><a href="https://www.cdc.gov/bmi/about/index.html" target="_blank" rel="noopener">CDC：BMI 是篩檢工具，不是診斷</a></li>
+<li><a href="https://www.cdc.gov/sleep/about/" target="_blank" rel="noopener">CDC：睡眠建議</a></li>
+<li><a href="https://pubmed.ncbi.nlm.nih.gov/28698222/" target="_blank" rel="noopener">Jäger 等，Journal of the International Society of Sports Nutrition（2017）：蛋白質與運動立場聲明</a></li>
+</ol>
+<p class="muted">這是一般健康教育工具，非醫療診斷。公開指引會更新，數值為概略參考，不是個人醫療處方。</p>
+</section>
+<footer>本網站在你的瀏覽器中計算，不會將輸入資料傳送至資料庫。</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function calculate(){
+ const age=Number($('age').value),h=Number($('height').value),w=Number($('weight').value);
+ const sex=$('sex').value,activity=$('activity').value,goal=$('goal').value;
+ $('error').textContent='';
+ if(!Number.isFinite(age)||age<18||age>110||!Number.isFinite(h)||h<100||h>230||!Number.isFinite(w)||w<25||w>350){
+  $('error').textContent='請確認年齡、身高與體重在允許範圍內。';return;
+ }
+ const bmi=w/((h/100)**2);
+ $('bmi').textContent=bmi.toFixed(1);
+ $('bmiStatus').textContent=bmi<18.5?'體重過輕':bmi<24?'一般成人參考範圍':bmi<27?'過重':'肥胖篩檢範圍';
+ let lo=.8,hi=1.0,reason='一般健康成人基本參考約 0.8 g/kg/日。';
+ if(goal==='muscle'||goal==='endurance'||goal==='fatloss'){lo=1.2;hi=1.6;reason=goal==='muscle'?'重訓／增肌者常用的實務範圍；仍需足夠總熱量與訓練。':goal==='endurance'?'規律耐力訓練者的實務參考；也要補足總熱量與碳水化合物。':'減脂期間可考慮較高蛋白質，以協助保留瘦體組織。'}
+ else if(activity==='moderate'){lo=1.0;hi=1.2;reason='一般活動者的實務起點；基本成人參考約 0.8 g/kg/日。'}
+ else if(activity==='high'){lo=1.2;hi=1.6;reason='活動量較高者可能需要較高蛋白質，應依訓練量調整。'}
+ $('protein').textContent=Math.round(w*lo)+'–'+Math.round(w*hi)+' g';
+ $('proteinDetail').textContent=lo.toFixed(1)+'–'+hi.toFixed(1)+' g/kg/日';
+ $('proteinReason').textContent=reason+' 計算：'+w+' kg × '+lo.toFixed(1)+'–'+hi.toFixed(1)+' g/kg = 約 '+Math.round(w*lo)+'–'+Math.round(w*hi)+' g/日。若有腎臟疾病或醫囑限蛋白，請先詢問醫療人員。';
+ const total=sex==='male'?2.5:2.0;
+ $('water').textContent=total.toFixed(1)+' L';
+ $('drink').textContent=(total*.8).toFixed(1)+' L';
+ const extra=activity==='high'?'耐力運動或炎熱環境會增加水分與鈉流失，應依流汗率、運動時間、體重變化調整。':activity==='moderate'?'運動日依時間、氣溫與流汗量額外補水。':'天氣炎熱、開始運動或大量流汗時，需在平常基礎上增加補水。';
+ const tips=[
+ 'EFSA 族群參考：男性約 2.5 L、女性約 2.0 L「總水分／日」，包含食物與所有飲料，並非精準個人處方。',
+ '若粗估食物提供約 20% 水分，飲料可先以約 '+(total*.8).toFixed(1)+' L／日規劃；食物種類差異很大，不能當成硬性最低量。',
+ extra,
+ '分散在一天中喝，依口渴、尿液顏色與環境調整；不要短時間大量灌水，也不必追求尿液完全透明。',
+ '若醫師曾要求限水，或有心臟、腎臟、肝臟相關疾病，請依醫囑。'
+ ];
+ $('waterTips').replaceChildren(...tips.map(t=>{const li=document.createElement('li');li.textContent=t;return li;}));
+}
+$('form').addEventListener('submit',e=>{e.preventDefault();calculate()});
+$('form').addEventListener('reset',()=>setTimeout(calculate,0));
+calculate();
+</script>
+</body>
+</html>
